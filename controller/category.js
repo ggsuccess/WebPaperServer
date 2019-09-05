@@ -61,13 +61,16 @@ function saveAllArticle(query, key, model, lang, category, count) {
       // console.log(info);
       for (let i = 0; i < info.value.length; i++) {
         let news = info.value[i];
+        console.log('기사:', news);
         let article = new model({
           category: news.category,
           url: news.url,
           img: news.image ? news.image.thumbnail.contentUrl : '',
           count: 0,
           keword: [],
-          provider: news.provider[0].name
+          provider: news.provider[0].name,
+          description: news.description,
+          date: news.datePublished
         });
 
         model.find({ url: article.url }, function(err, docs) {
