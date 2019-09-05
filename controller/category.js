@@ -7,7 +7,7 @@ let schobj = {
   url: String,
   img: String,
   count: Number,
-  keword: [String],
+  keyword: [String],
   provider: String,
   date: String,
   description: String
