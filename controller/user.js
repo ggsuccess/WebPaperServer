@@ -3,11 +3,10 @@ const express = require('express');
 
 const userSchema = new mongoose.Schema({
   name: String,
-  name: String,
   pw: String,
   category: String,
   follow: String,
-  bookmark: String,
+  bookmark: [String],
   comment: [String]
 });
 const User = mongoose.model('userlist', userSchema);

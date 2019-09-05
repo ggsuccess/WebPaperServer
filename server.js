@@ -50,7 +50,7 @@ setInterval(() => {
       20
     );
   }
-}, 5 * min);
+}, 30 * min);
 
 app.get('/', (req, res) => {
   res.send('hi');
