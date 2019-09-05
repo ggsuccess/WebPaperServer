@@ -11,14 +11,3 @@ const userSchema = new mongoose.Schema({
   comment: [String]
 });
 const User = mongoose.model('userlist', userSchema);
-
-// async function createUser() {
-//     const user = new User({
-//       name: '영훈'
-//     });
-
-//     const result = await user.save();
-//     console.log(result);
-//   }
-
-// createUser();
