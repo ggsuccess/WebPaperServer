@@ -1,12 +1,14 @@
 const mongoose = require('mongoose');
 const express = require('express');
-var request = require('request');
+const request = require('request');
+const categoryRouter = express.Router();
 
 let schobj = {
   category: String,
   url: String,
+  name: String,
   img: String,
-  count: Number,
+  count: 0,
   keyword: [String],
   provider: String,
   date: String,
@@ -65,6 +67,7 @@ function saveAllArticle(query, key, model, lang, category, count) {
         let article = new model({
           category: news.category,
           url: news.url,
+          name: news.name,
           img: news.image ? news.image.thumbnail.contentUrl : '',
           count: 0,
           keword: [],
@@ -87,7 +90,48 @@ function saveAllArticle(query, key, model, lang, category, count) {
   return false;
 }
 // bingNewsSearch('조국', 'mkt=ko-KR&count=50&offset=0', API_KEY_COOKIE);
+
+function getCategory(categoryname) {
+  categoryname = categoryname.toLowerCase();
+  if (categoryname === 'sports') {
+    return Sports;
+  } else if (categoryname === 'business') {
+    return Business;
+  } else if (categoryname === 'entertainment') {
+    return Entertainment;
+  } else if (categoryname === 'health') {
+    return Health;
+  } else if (categoryname === 'politics') {
+    return Politics;
+  } else if (categoryname === 'products') {
+    return Politics;
+  } else if (categoryname === 'scienceandtechnology') {
+    return ScienceAndTechnology;
+  }
+}
+
+categoryRouter.get('/', async (req, res) => {
+  if (req.query.name) {
+    let Model = getCategory(req.query.name);
+    let model = 'no pages';
+    model = await Model.find().sort('date');
+    res.send(model);
+  } else {
+    res.status(404).send('no query');
+  }
+});
+
+categoryRouter.post('/', async (req, res) => {
+  let { _id, category } = req.body;
+  let Model = getCategory(category);
+  let model = await Model.findById(_id);
+  model.count++;
+  await model.save();
+  res.send(model);
+});
+
 module.exports = {
+  categoryRouter,
   saveAllArticle,
   Sports,
   Business,

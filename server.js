@@ -1,7 +1,12 @@
 const mongoose = require('mongoose');
 const express = require('express');
 const app = express();
+const cors = require('cors');
+
+const API_KEY_COOKIE = '623991a42f5749198cf6e80737cbb84a';
+
 const {
+  categoryRouter,
   saveAllArticle,
   Sports,
   Business,
@@ -31,8 +36,6 @@ let categoryStringArr = [
   'scienceAndTechnology'
 ];
 
-const API_KEY_COOKIE = '623991a42f5749198cf6e80737cbb84a';
-
 mongoose
   .connect('mongodb://localhost/webpaperdb')
   .then(() => console.log('Connected mongoDB'))
@@ -50,15 +53,11 @@ setInterval(() => {
       20
     );
   }
-}, 30 * min);
-
-app.get('/', (req, res) => {
-  res.send('hi');
-});
-
-app.get('/api/getId', (req, res) => {
-  res.send('this id');
-});
+}, 10 * min);
+app.use(cors());
+app.use(express.json());
+app.use('/api/category', categoryRouter);
+app.use('/api/count', categoryRouter);
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => console.log(`server on port ${port}...`));
