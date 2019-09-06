@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
 const express = require('express');
-var request = require('request');
+const request = require('request');
+const categoryRouter = express.Router();
 
 let schobj = {
   category: String,
   url: String,
+  name: String,
   img: String,
   count: Number,
   keyword: [String],
@@ -65,6 +67,7 @@ function saveAllArticle(query, key, model, lang, category, count) {
         let article = new model({
           category: news.category,
           url: news.url,
+          name: news.name,
           img: news.image ? news.image.thumbnail.contentUrl : '',
           count: 0,
           keword: [],
@@ -87,7 +90,69 @@ function saveAllArticle(query, key, model, lang, category, count) {
   return false;
 }
 // bingNewsSearch('조국', 'mkt=ko-KR&count=50&offset=0', API_KEY_COOKIE);
+
+categoryRouter.get('/', async (req, res) => {
+  let genre = req.query.name;
+  console.log('hihihih');
+  genre = genre.toLowerCase();
+  let model = 'no pages';
+  if (genre === 'sports') {
+    model = await Sports.find().sort('date');
+  } else if (genre === 'business') {
+    model = await Business.find().sort('date');
+  } else if (genre === 'entertainment') {
+    model = await Entertainment.find().sort('date');
+  } else if (genre === 'health') {
+    model = await Health.find().sort('date');
+  } else if (genre === 'politics') {
+    model = await Politics.find().sort('date');
+  } else if (genre === 'products') {
+    model = await Politics.find().sort('date');
+  } else if (genre === 'scienceandtechnology') {
+    model = await ScienceAndTechnology.find().sort('date');
+  }
+  res.send(model);
+});
+
+// categoryRouter.get('/:categoryname', async (req, res) => {});
+
+// categoryRouter.get('/sports', async (req, res) => {
+//   const sports = await Sports.find().sort('date');
+//   res.send(sports);
+// });
+
+// categoryRouter.get('/business', async (req, res) => {
+//   const business = await Business.find().sort('date');
+//   res.send(business);
+// });
+
+// categoryRouter.get('/entertainment', async (req, res) => {
+//   const entertainment = await Entertainment.find().sort('date');
+//   res.send(entertainment);
+// });
+
+// categoryRouter.get('/health', async (req, res) => {
+//   const health = await Health.find().sort('date');
+//   res.send(health);
+// });
+
+// categoryRouter.get('/politics', async (req, res) => {
+//   const politics = await Politics.find().sort('date');
+//   res.send(politics);
+// });
+
+// categoryRouter.get('/products', async (req, res) => {
+//   const products = await Products.find().sort('date');
+//   res.send(products);
+// });
+
+// categoryRouter.get('/scienceAndTechnology', async (req, res) => {
+//   const scienceAndTechnology = await ScienceAndTechnology.find().sort('date');
+//   res.send(scienceAndTechnology);
+// });
+
 module.exports = {
+  categoryRouter,
   saveAllArticle,
   Sports,
   Business,
