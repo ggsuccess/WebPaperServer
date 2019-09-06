@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const express = require('express');
 const request = require('request');
 const categoryRouter = express.Router();
-
+const BING_ENDPOINT = 'https://api.cognitive.microsoft.com/bing/v7.0/news';
+const API_KEY_COOKIE = '623991a42f5749198cf6e80737cbb84a';
 let schobj = {
   category: String,
   url: String,
@@ -29,14 +30,12 @@ const ScienceAndTechnology = mongoose.model(
   new mongoose.Schema(schobj)
 );
 
-const BING_ENDPOINT = 'https://api.cognitive.microsoft.com/bing/v7.0/news';
-const API_KEY_COOKIE = '623991a42f5749198cf6e80737cbb84a';
 // CLIENT_ID_COOKIE = 'bing-search-client-id';
 
 function saveAllArticle(query, key, model, lang, category, count) {
   let options =
     'mkt=' + lang + '&category=' + category + '&count=' + count + '&offset=0';
-  console.log(options);
+  // console.log(options);
   if (query) {
     var queryurl =
       BING_ENDPOINT +
@@ -63,7 +62,7 @@ function saveAllArticle(query, key, model, lang, category, count) {
       // console.log(info);
       for (let i = 0; i < info.value.length; i++) {
         let news = info.value[i];
-        console.log('기사:', news);
+        // console.log('기사:', news);
         let article = new model({
           category: news.category,
           url: news.url,
@@ -80,7 +79,7 @@ function saveAllArticle(query, key, model, lang, category, count) {
           //중복데이터 아닐때만 저장
           if (!err && docs.length === 0) {
             article.save();
-            console.log(article);
+            // console.log(article);
           }
         });
       }
@@ -104,7 +103,7 @@ function getCategory(categoryname) {
   } else if (categoryname === 'politics') {
     return Politics;
   } else if (categoryname === 'products') {
-    return Politics;
+    return Products;
   } else if (categoryname === 'scienceandtechnology') {
     return ScienceAndTechnology;
   }
@@ -131,6 +130,7 @@ categoryRouter.post('/', async (req, res) => {
 });
 
 module.exports = {
+  schobj,
   categoryRouter,
   saveAllArticle,
   Sports,
