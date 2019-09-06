@@ -8,7 +8,7 @@ let schobj = {
   url: String,
   name: String,
   img: String,
-  count: Number,
+  count: 0,
   keyword: [String],
   provider: String,
   date: String,
@@ -91,65 +91,44 @@ function saveAllArticle(query, key, model, lang, category, count) {
 }
 // bingNewsSearch('조국', 'mkt=ko-KR&count=50&offset=0', API_KEY_COOKIE);
 
-categoryRouter.get('/', async (req, res) => {
-  let genre = req.query.name;
-  console.log('hihihih');
-  genre = genre.toLowerCase();
-  let model = 'no pages';
-  if (genre === 'sports') {
-    model = await Sports.find().sort('date');
-  } else if (genre === 'business') {
-    model = await Business.find().sort('date');
-  } else if (genre === 'entertainment') {
-    model = await Entertainment.find().sort('date');
-  } else if (genre === 'health') {
-    model = await Health.find().sort('date');
-  } else if (genre === 'politics') {
-    model = await Politics.find().sort('date');
-  } else if (genre === 'products') {
-    model = await Politics.find().sort('date');
-  } else if (genre === 'scienceandtechnology') {
-    model = await ScienceAndTechnology.find().sort('date');
+function getCategory(categoryname) {
+  categoryname = categoryname.toLowerCase();
+  if (categoryname === 'sports') {
+    return Sports;
+  } else if (categoryname === 'business') {
+    return Business;
+  } else if (categoryname === 'entertainment') {
+    return Entertainment;
+  } else if (categoryname === 'health') {
+    return Health;
+  } else if (categoryname === 'politics') {
+    return Politics;
+  } else if (categoryname === 'products') {
+    return Politics;
+  } else if (categoryname === 'scienceandtechnology') {
+    return ScienceAndTechnology;
   }
-  res.send(model);
+}
+
+categoryRouter.get('/', async (req, res) => {
+  if (req.query.name) {
+    let Model = getCategory(req.query.name);
+    let model = 'no pages';
+    model = await Model.find().sort('date');
+    res.send(model);
+  } else {
+    res.status(404).send('no query');
+  }
 });
 
-// categoryRouter.get('/:categoryname', async (req, res) => {});
-
-// categoryRouter.get('/sports', async (req, res) => {
-//   const sports = await Sports.find().sort('date');
-//   res.send(sports);
-// });
-
-// categoryRouter.get('/business', async (req, res) => {
-//   const business = await Business.find().sort('date');
-//   res.send(business);
-// });
-
-// categoryRouter.get('/entertainment', async (req, res) => {
-//   const entertainment = await Entertainment.find().sort('date');
-//   res.send(entertainment);
-// });
-
-// categoryRouter.get('/health', async (req, res) => {
-//   const health = await Health.find().sort('date');
-//   res.send(health);
-// });
-
-// categoryRouter.get('/politics', async (req, res) => {
-//   const politics = await Politics.find().sort('date');
-//   res.send(politics);
-// });
-
-// categoryRouter.get('/products', async (req, res) => {
-//   const products = await Products.find().sort('date');
-//   res.send(products);
-// });
-
-// categoryRouter.get('/scienceAndTechnology', async (req, res) => {
-//   const scienceAndTechnology = await ScienceAndTechnology.find().sort('date');
-//   res.send(scienceAndTechnology);
-// });
+categoryRouter.post('/', async (req, res) => {
+  let { _id, category } = req.body;
+  let Model = getCategory(category);
+  let model = await Model.findById(_id);
+  model.count++;
+  await model.save();
+  res.send(model);
+});
 
 module.exports = {
   categoryRouter,
