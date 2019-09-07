@@ -21,8 +21,16 @@ commentRouter.post('/', async (req, res) => {
     text: text,
     date: date
   });
-  comment.save();
+  await comment.save();
   res.send('ok');
+});
+
+commentRouter.get('/', async (req, res) => {
+  const { userId } = req.body;
+  let comments = await Comment.find({ userId: userId }).sort('-date');
+  if (!comments) return res.status(400).send('comment is not exist');
+
+  res.send(comments);
 });
 
 module.exports = { commentRouter };

@@ -48,6 +48,7 @@ app.use('/api/category', categoryRouter);
 app.use('/api/count', categoryRouter);
 app.use('/api/hottopic', hottopicRouter);
 app.use('/api/comment', commentRouter);
+app.use('/api/getcomments', commentRouter);
 
 let min = 1000 * 60;
 setInterval(() => {
