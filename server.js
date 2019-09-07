@@ -4,6 +4,8 @@ const app = express();
 const cors = require('cors');
 const { getHotTopic, hottopicRouter } = require('./controller/hottopic');
 const API_KEY_COOKIE = '623991a42f5749198cf6e80737cbb84a';
+const { commentRouter } = require('./controller/comment');
+
 const {
   categoryRouter,
   saveAllArticle,
@@ -45,6 +47,8 @@ app.use(express.json());
 app.use('/api/category', categoryRouter);
 app.use('/api/count', categoryRouter);
 app.use('/api/hottopic', hottopicRouter);
+app.use('/api/comment', commentRouter);
+app.use('/api/getcomments', commentRouter);
 
 let min = 1000 * 60;
 setInterval(() => {
