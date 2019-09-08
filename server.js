@@ -1,11 +1,13 @@
+const config = require('config');
 const mongoose = require('mongoose');
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const { usersRouter } = require('./controller/user');
 const { getHotTopic, hottopicRouter } = require('./controller/hottopic');
 const API_KEY_COOKIE = '623991a42f5749198cf6e80737cbb84a';
+const { authRouter } = require('./controller/auth');
 const { commentRouter, hotcommentRouter } = require('./controller/comment');
-
 const {
   categoryRouter,
   saveAllArticle,
@@ -37,6 +39,11 @@ let categoryStringArr = [
   'scienceAndTechnology'
 ];
 
+// if (!config.get('jwtPrivateKey')) {
+//   console.error('Error: jwtPrivateKey is not defined');
+//   process.exit(1);
+// }
+
 mongoose
   .connect('mongodb://localhost/webpaperdb')
   .then(() => console.log('Connected mongoDB'))
@@ -47,9 +54,11 @@ app.use(express.json());
 app.use('/api/category', categoryRouter);
 app.use('/api/count', categoryRouter);
 app.use('/api/hottopic', hottopicRouter);
+app.use('/api/gettopiccomments', hotcommentRouter);
 app.use('/api/comment', commentRouter);
 app.use('/api/getusercomments', commentRouter);
-app.use('/api/gettopiccomments', hotcommentRouter);
+app.use('/api/user', usersRouter);
+app.use('/api/login', authRouter);
 
 let min = 1000 * 60;
 setInterval(() => {

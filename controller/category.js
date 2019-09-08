@@ -130,6 +130,7 @@ categoryRouter.post('/', async (req, res) => {
 });
 
 module.exports = {
+  getCategory,
   schobj,
   categoryRouter,
   saveAllArticle,

@@ -2,6 +2,9 @@ const mongoose = require('mongoose');
 const express = require('express');
 const commentRouter = express.Router();
 const hotcommentRouter = express.Router();
+const auth = require('../middleware/auth');
+const { User } = require('./user');
+
 const Comment = mongoose.model(
   'comments',
   new mongoose.Schema({
@@ -12,21 +15,34 @@ const Comment = mongoose.model(
   })
 );
 
-commentRouter.post('/', async (req, res) => {
+commentRouter.post('/', auth, async (req, res) => {
   const { userId, hotTopicId, text, date } = req.body;
-
   let comment = new Comment({
     userId: userId,
     hotTopicId: hotTopicId,
     text: text,
     date: date
   });
+
+  let user = await User.find({ email: userId });
+
+  user[0].comment.push(comment);
+
+  await user[0].save();
   await comment.save();
   res.send('ok');
 });
 
+// const customer = await Customer.findByIdAndUpdate(req.params.id,
+//   {
+//     name: req.body.name,
+//     isGold: req.body.isGold,
+//     phone: req.body.phone
+//   }, { new: true });
+
 commentRouter.get('/', async (req, res) => {
   const { userId } = req.query;
+
   let comments = await Comment.find({ userId: userId }).sort('-date');
   if (!comments) return res.status(400).send('comment is not exist');
 
