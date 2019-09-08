@@ -78,6 +78,7 @@ usersRouter.post('/bookmark', auth, async (req, res) => {
   let user = await User.findById(req.user._id);
   user.bookmark.push(news[0]);
   await user.save();
+  res.send('ok');
   // res.send(user.bookmark);
 });
 
