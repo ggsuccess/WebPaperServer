@@ -75,11 +75,11 @@ setInterval(() => {
       categoryArr[i],
       'en-us',
       categoryStringArr[i],
-      20
+      10
     );
   }
   getHotTopic();
-}, 5000);
+}, 10*min);
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => console.log(`server on port ${port}...`));
