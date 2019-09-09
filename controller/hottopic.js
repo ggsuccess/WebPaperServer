@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const request = require('request');
 const hottopicRouter = express.Router();
-const API_KEY_COOKIE = require('../key');
+const { API_KEY_COOKIE } = require('../key');
 const BING_ENDPOINT = 'https://api.cognitive.microsoft.com/bing/v7.0/news';
 const {
   getCategory,
@@ -34,7 +34,8 @@ const HotTopic = mongoose.model(
     url: String,
     text: String,
     del: String,
-    img: String
+    img: String,
+    category: String
   })
 );
 
@@ -49,7 +50,7 @@ const LinkedNews = mongoose.model(
     provider: String,
     date: String,
     description: String,
-    topicurl: String
+    keyword: String
   })
 );
 
@@ -65,7 +66,7 @@ function getKeyword(query) {
 
 function saveLinkedArticle(query, key, lang, category, count) {
   query = getKeyword(query);
-  console.log('검색어', query);
+  // console.log('검색어', query);
 
   let options =
     'mkt=' + lang + '&category=' + category + '&count=' + count + '&offset=0';
@@ -92,29 +93,29 @@ function saveLinkedArticle(query, key, lang, category, count) {
 
   request.get(option, async (err, res, body) => {
     if (!err && res.statusCode == 200) {
-      let info = JSON.parse(body);
-      // console.log(info);
+      let info = JSON.parse(body); //query로 검색한 기사객체 배열
+
       try {
         for (let i = 0; i < info.value.length; i++) {
           let news = info.value[i];
-          let Model = getCategory(news.category);
-          if (Model) {
-            let model = await Model.find({ url: news.url });
-            model.keyword = query;
-            await model.save();
+          // console.log('뉴스객체', news);
+          if (news.category) {
+            let model = new LinkedNews({
+              category: news.category,
+              url: news.url,
+              name: news.name,
+              img: news.image.thumbnail.contentUrl,
+              count: 0,
+              date: news.datePublished,
+              keyword: query
+            });
+
+            await LinkedNews.find({ url: model.url }, (err, docs) => {
+              if (!err && docs.length === 0) {
+                model.save();
+              }
+            });
           }
-          // let article = new LinkedNews({
-          //   category: news.category,
-          //   url: news.url,
-          //   name: news.name,
-          //   img: news.image ? news.image.thumbnail.contentUrl : '',
-          //   count: 0,
-          //   provider: news.provider[0].name,
-          //   description: news.description,
-          //   date: news.datePublished
-          // });
-          // result.push(article);
-          // console.log(article);
         }
       } catch (err) {
         console.log(err);
@@ -146,29 +147,33 @@ async function getHotTopic() {
   });
 
   for (let i = 0; i < result.length; i++) {
+    //result  각 카테고리별 최대 조회수 기사 배열
     let hottopic = new HotTopic({
       articleList: [],
       count: result[i].count,
       img: result[i].img,
       topic: result[i].name,
       url: result[i].url,
-      text: result[i].description,
-      del: 'del'
+      text: '',
+      del: 'del',
+      category: result[i].category
     });
     await hottopic.save();
 
     saveLinkedArticle(
+      //각 기사제목 앞 세단어 검색
       result[i].name,
       API_KEY_COOKIE,
       'en-us',
       result[i].category,
       20
     );
-    let Model = getCategory(result[i].category);
+    let keyword = getKeyword(result[i].name);
+    console.log(keyword);
     try {
-      let model = await Model.find({ keyword: result[i].keyword });
-
-      hottopic.articleList = model;
+      let linkednews = await LinkedNews.find({ keyword: keyword });
+      console.log('===========', linkednews);
+      hottopic.articleList = linkednews;
       await hottopic.save();
     } catch (err) {
       console.log(err);
