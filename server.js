@@ -1,11 +1,14 @@
+require('express-async-errors');
+const winston = require('winston');
 const config = require('config');
+const error = require('./middleware/error');
 const mongoose = require('mongoose');
 const express = require('express');
 const app = express();
 const cors = require('cors');
 const { usersRouter } = require('./controller/user');
 const { getHotTopic, hottopicRouter } = require('./controller/hottopic');
-const API_KEY_COOKIE = '623991a42f5749198cf6e80737cbb84a';
+const { API_KEY_COOKIE } = require('./key');
 const { authRouter } = require('./controller/auth');
 const { commentRouter, hotcommentRouter } = require('./controller/comment');
 const {
@@ -60,7 +63,10 @@ app.use('/api/getusercomments', commentRouter);
 app.use('/api/user', usersRouter);
 app.use('/api/login', authRouter);
 
+app.use(error);
+
 let min = 1000 * 60;
+let hour = 60 * min;
 setInterval(() => {
   for (let i = 0; i < categoryArr.length; i++) {
     saveAllArticle(
@@ -73,7 +79,7 @@ setInterval(() => {
     );
   }
   getHotTopic();
-}, 10 * min);
+}, 5000);
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => console.log(`server on port ${port}...`));
