@@ -51,34 +51,46 @@ function validateUser(user) {
 }
 
 usersRouter.get('/me', auth, async (req, res) => {
-  let user = await User.findById(req.user._id).select('-pw');
-  res.send(user);
+  try {
+    let user = await User.findById(req.user._id).select('-pw');
+    res.send(user);
+  } catch (err) {
+    res.status(500).send('something wrong in profile informaiton');
+  }
 });
 
 usersRouter.post('/signup', async (req, res) => {
   const { error } = validateUser(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  let user = await User.findOne({ email: req.body.email });
-  if (user) return res.status(400).send('email is duplicated');
+  try {
+    let user = await User.findOne({ email: req.body.email });
+    if (user) return res.status(400).send('email is duplicated');
 
-  user = new User(_.pick(req.body, ['email', 'pw']));
-  const salt = await bcrypt.genSalt(10);
-  user.pw = await bcrypt.hash(user.pw, salt);
+    user = new User(_.pick(req.body, ['email', 'pw']));
+    const salt = await bcrypt.genSalt(10);
+    user.pw = await bcrypt.hash(user.pw, salt);
 
-  await user.save();
+    await user.save();
 
-  res.send(_.pick(user, ['_id', 'email']));
+    res.send(_.pick(user, ['_id', 'email']));
+  } catch (err) {
+    res.status(500).send('something wrong in singup');
+  }
 });
 
 usersRouter.post('/bookmark', auth, async (req, res) => {
   const { url, category } = req.body;
   let Model = getCategory(category);
-  let news = await Model.find({ url: url });
-  let user = await User.findById(req.user._id);
-  user.bookmark.push(news[0]);
-  await user.save();
-  res.send('ok');
+  try {
+    let news = await Model.find({ url: url });
+    let user = await User.findById(req.user._id);
+    user.bookmark.push(news[0]);
+    await user.save();
+    res.send('ok');
+  } catch (err) {
+    res.status(500).send('something wrong in POST bookmark');
+  }
   // res.send(user.bookmark);
 });
 
