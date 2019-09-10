@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
   comment: Array
 });
 userSchema.methods.generateAuthToken = function() {
-  const token = jwt.sign({ _id: this._id }, config.get('jwtPrivateKey'));
+  const token = jwt.sign({ email: this.email }, config.get('jwtPrivateKey'));
   return token;
 };
 const User = mongoose.model('userlist', userSchema);
@@ -52,7 +52,7 @@ function validateUser(user) {
 
 usersRouter.get('/me', auth, async (req, res) => {
   try {
-    let user = await User.findById(req.user._id).select('-pw');
+    let user = await User.find({ email: req.user.email }).select('-pw');
     res.send(user);
   } catch (err) {
     res.status(500).send('something wrong in profile informaiton');
@@ -70,10 +70,13 @@ usersRouter.post('/signup', async (req, res) => {
     user = new User(_.pick(req.body, ['email', 'pw']));
     const salt = await bcrypt.genSalt(10);
     user.pw = await bcrypt.hash(user.pw, salt);
-
     await user.save();
+    const token = user.generateAuthToken();
 
-    res.send(_.pick(user, ['_id', 'email']));
+    res
+      .header('x-auth-token', token)
+      .header('access-control-expose-headers', 'x-auth-token')
+      .send(_.pick(user, ['_id', 'email']));
   } catch (err) {
     res.status(500).send('something wrong in singup');
   }
@@ -81,24 +84,27 @@ usersRouter.post('/signup', async (req, res) => {
 
 usersRouter.post('/bookmark', auth, async (req, res) => {
   const { url, category } = req.body;
+
   let Model = getCategory(category);
-  try {
-    let news = await Model.find({ url: url });
-    let user = await User.findById(req.user._id);
-    user.bookmark.push(news[0]);
-    await user.save();
-    res.send('ok');
-  } catch (err) {
-    res.status(500).send('something wrong in POST bookmark');
-  }
+
+  let news = await Model.find({ url: url });
+  console.log(news);
+  let user = await User.find({ email: req.user.email });
+
+  user[0].bookmark.push(news[0]);
+
+  await user[0].save();
+
+  res.send('ok');
+
   // res.send(user.bookmark);
 });
 
 usersRouter.get('/getbookmark', auth, async (req, res) => {
-  const { email } = req.body;
+  console.log(req.user);
 
   try {
-    let user = await User.find({ email: email });
+    let user = await User.find({ email: req.user.email });
     res.send(user[0].bookmark);
   } catch (err) {
     res.status(500).send('something err');

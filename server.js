@@ -89,11 +89,11 @@ setInterval(() => {
       20
     );
   }
-}, 39000);
+}, 80 * min);
 
 setInterval(() => {
   getHotTopic();
-}, 27000);
+}, 55 * min);
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => console.log(`server on port ${port}...`));

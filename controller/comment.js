@@ -16,6 +16,7 @@ const Comment = mongoose.model(
 );
 
 commentRouter.post('/', auth, async (req, res) => {
+  console.log(req);
   const { userId, hotTopicId, text, date } = req.body;
   let comment = new Comment({
     userId: userId,
@@ -38,10 +39,10 @@ commentRouter.post('/', auth, async (req, res) => {
 //     phone: req.body.phone
 //   }, { new: true });
 
-commentRouter.get('/', async (req, res, next) => {
-  const { userId } = req.query;
-
-  let comments = await Comment.find({ userId: userId }).sort('-date');
+commentRouter.get('/', auth, async (req, res, next) => {
+  const { email } = req.user;
+  console.log(email);
+  let comments = await Comment.find({ userId: email }).sort('-date');
   if (!comments) return res.status(400).send('comment is not exist');
   res.send(comments);
 });
