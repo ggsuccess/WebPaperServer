@@ -3,14 +3,14 @@ const express = require('express');
 const request = require('request');
 const categoryRouter = express.Router();
 const BING_ENDPOINT = 'https://api.cognitive.microsoft.com/bing/v7.0/news';
-const API_KEY_COOKIE = '623991a42f5749198cf6e80737cbb84a';
+
 let schobj = {
   category: String,
   url: String,
   name: String,
   img: String,
   count: 0,
-  keyword: [String],
+  keyword: String,
   provider: String,
   date: String,
   description: String
@@ -29,8 +29,6 @@ const ScienceAndTechnology = mongoose.model(
   'ScienceAndTechnology',
   new mongoose.Schema(schobj)
 );
-
-// CLIENT_ID_COOKIE = 'bing-search-client-id';
 
 function saveAllArticle(query, key, model, lang, category, count) {
   let options =
@@ -56,10 +54,10 @@ function saveAllArticle(query, key, model, lang, category, count) {
     }
   };
 
-  request(option, function(err, res, body) {
+  request(option, async (err, res, body) => {
     if (!err && res.statusCode == 200) {
       let info = JSON.parse(body);
-      // console.log(info);
+
       for (let i = 0; i < info.value.length; i++) {
         let news = info.value[i];
         // console.log('기사:', news);
@@ -69,19 +67,23 @@ function saveAllArticle(query, key, model, lang, category, count) {
           name: news.name,
           img: news.image ? news.image.thumbnail.contentUrl : '',
           count: 0,
-          keword: [],
+          keyword: '',
           provider: news.provider[0].name,
           description: news.description,
           date: news.datePublished
         });
 
-        model.find({ url: article.url }, function(err, docs) {
-          //중복데이터 아닐때만 저장
-          if (!err && docs.length === 0) {
-            article.save();
-            // console.log(article);
-          }
-        });
+        try {
+          await model.find({ url: article.url }, function(err, docs) {
+            //중복데이터 아닐때만 저장
+            if (!err && docs.length === 0) {
+              article.save();
+              // console.log(article);
+            }
+          });
+        } catch (err) {
+          res.status(500).send('something wrong in saveArticle');
+        }
       }
     }
   });
