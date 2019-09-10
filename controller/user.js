@@ -94,4 +94,15 @@ usersRouter.post('/bookmark', auth, async (req, res) => {
   // res.send(user.bookmark);
 });
 
+usersRouter.get('/getbookmark', auth, async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    let user = await User.find({ email: email });
+    res.send(user[0].bookmark);
+  } catch (err) {
+    res.status(500).send('something err');
+  }
+});
+
 module.exports = { usersRouter, User };
