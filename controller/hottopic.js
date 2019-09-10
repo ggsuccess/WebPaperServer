@@ -154,7 +154,7 @@ async function getHotTopic() {
       img: result[i].img,
       topic: result[i].name,
       url: result[i].url,
-      text: '',
+      text: result[i].description,
       del: 'del',
       category: result[i].category
     });
