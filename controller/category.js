@@ -108,6 +108,8 @@ function getCategory(categoryname) {
     return Products;
   } else if (categoryname === 'scienceandtechnology') {
     return ScienceAndTechnology;
+  } else {
+    return false;
   }
 }
 
