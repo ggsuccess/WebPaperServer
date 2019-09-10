@@ -3,6 +3,7 @@ const config = require('config');
 const error = require('./middleware/error');
 const mongoose = require('mongoose');
 const express = require('express');
+const winston = require('winston');
 const app = express();
 const cors = require('cors');
 const { usersRouter } = require('./controller/user');
@@ -46,6 +47,17 @@ let categoryStringArr = [
 //   process.exit(1);
 // }
 
+process.on('uncaughtException', err => {
+  console.log('I got a uncaught exception error =>', Error);
+
+  // winston.error(err.message, err);
+});
+process.on('unhandledRejection', err => {
+  console.log('I got a uncaught UNHANDLED REJECTION =>', err);
+
+  // winston.error(err.message, err);
+});
+
 mongoose
   .connect('mongodb://localhost/webpaperdb')
   .then(() => console.log('Connected mongoDB'))
@@ -74,11 +86,14 @@ setInterval(() => {
       categoryArr[i],
       'en-us',
       categoryStringArr[i],
-      10
+      20
     );
   }
+}, 39000);
+
+setInterval(() => {
   getHotTopic();
-}, 10 * min);
+}, 27000);
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => console.log(`server on port ${port}...`));

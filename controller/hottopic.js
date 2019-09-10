@@ -58,13 +58,14 @@ function getKeyword(query) {
   let count = 0;
   for (let i = 0; i < query.length; i++) {
     if (query[i] === ' ') count++;
-    if (count === 3) {
+    if (count === 4) {
       return query.slice(0, i);
     }
   }
 }
 
 function saveLinkedArticle(query, key, lang, category, count) {
+  let topic = query;
   query = getKeyword(query);
   // console.log('검색어', query);
 
@@ -92,34 +93,48 @@ function saveLinkedArticle(query, key, lang, category, count) {
   };
 
   request.get(option, async (err, res, body) => {
+    console.log(body);
     if (!err && res.statusCode == 200) {
       let info = JSON.parse(body); //query로 검색한 기사객체 배열
+      let news = info.value.filter(
+        x => x.hasOwnProperty('url') & x.hasOwnProperty('name')
+      );
+      let hot = await HotTopic.find({ topic: topic });
+      hot[0].articleList = news;
+      await hot[0].save();
+      // try {
+      //   for (let i = 0; i < info.value.length; i++) {
+      //     let news = info.value[i];
+      //     // console.log('뉴스객체', news);
+      //     if (news.category) {
+      //       let Model = getCategory(news.category);
+      //       if (Model) {
+      //         let model = await Model.find({ url: news.url });
+      //         if (model.length !== 0) {
+      //           model[0].keyword = query;
+      //           await model[0].save();
+      //         }
+      //       }
+      //       let model = new LinkedNews({
+      //         category: news.category,
+      //         url: news.url,
+      //         name: news.name,
+      //         img: news.image.thumbnail.contentUrl,
+      //         count: 0,
+      //         date: news.datePublished,
+      //         keyword: query
+      //       });
 
-      try {
-        for (let i = 0; i < info.value.length; i++) {
-          let news = info.value[i];
-          // console.log('뉴스객체', news);
-          if (news.category) {
-            let model = new LinkedNews({
-              category: news.category,
-              url: news.url,
-              name: news.name,
-              img: news.image.thumbnail.contentUrl,
-              count: 0,
-              date: news.datePublished,
-              keyword: query
-            });
-
-            await LinkedNews.find({ url: model.url }, (err, docs) => {
-              if (!err && docs.length === 0) {
-                model.save();
-              }
-            });
-          }
-        }
-      } catch (err) {
-        console.log(err);
-      }
+      //       await LinkedNews.find({ url: model.url }, (err, docs) => {
+      //         if (!err && docs.length === 0) {
+      //           model.save();
+      //         }
+      //       });
+      //     }
+      //   }
+      // } catch (err) {
+      //   console.log(err);
+      // }
     }
   });
 }
@@ -131,7 +146,8 @@ async function getHotTopic() {
     for (let i = 0; i < categoryArr.length; i++) {
       // console.log(categoryArr[i]);
       model = await categoryArr[i].find().sort('-count');
-      result.push(model[0]);
+
+      await result.push(model[0]);
     }
   } catch (err) {
     console.log(err);
@@ -148,35 +164,39 @@ async function getHotTopic() {
 
   for (let i = 0; i < result.length; i++) {
     //result  각 카테고리별 최대 조회수 기사 배열
-    let hottopic = new HotTopic({
-      articleList: [],
-      count: result[i].count,
-      img: result[i].img,
-      topic: result[i].name,
-      url: result[i].url,
-      text: result[i].description,
-      del: 'del',
-      category: result[i].category
-    });
-    await hottopic.save();
 
-    saveLinkedArticle(
-      //각 기사제목 앞 세단어 검색
-      result[i].name,
-      API_KEY_COOKIE,
-      'en-us',
-      result[i].category,
-      20
-    );
-    let keyword = getKeyword(result[i].name);
-    console.log(keyword);
-    try {
-      let linkednews = await LinkedNews.find({ keyword: keyword });
-      console.log('===========', linkednews);
-      hottopic.articleList = linkednews;
+    if (result[i]) {
+      let hottopic = new HotTopic({
+        articleList: [],
+        count: result[i].count,
+        img: result[i].img,
+        topic: result[i].name,
+        url: result[i].url,
+        text: result[i].description,
+        del: 'del',
+        category: result[i].category
+      });
       await hottopic.save();
-    } catch (err) {
-      console.log(err);
+
+      saveLinkedArticle(
+        //각 기사제목 앞 세단어 검색
+        result[i].name,
+        API_KEY_COOKIE,
+        'en-us',
+        result[i].category,
+        10
+      );
+      // let keyword = getKeyword(result[i].name);
+      // let Model = getCategory(hottopic.category);
+      // if (Model) {
+      //   try {
+      //     let model = await Model.find({ keyword: keyword });
+      //     hottopic.articleList = model;
+      //     await hottopic.save();
+      //   } catch (err) {
+      //     console.log(err);
+      //   }
+      // }
     }
   }
 }
