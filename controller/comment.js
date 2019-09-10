@@ -16,6 +16,7 @@ const Comment = mongoose.model(
 );
 
 commentRouter.post('/', auth, async (req, res) => {
+  console.log(req);
   const { userId, hotTopicId, text, date } = req.body;
   let comment = new Comment({
     userId: userId,
