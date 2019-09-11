@@ -61,7 +61,7 @@ process.on('unhandledRejection', err => {
 mongoose
   .connect(
     // 'mongodb://localhost/webpaperdb'
-    'mongodb+srv://admin:Fvifnwp6GQRVlOap@webpaperserver-dpwdk.mongodb.net/test?retryWrites=true&w=majority'
+    `mongodb+srv://admin:${process.env.mgdbpw}@webpaperserver-dpwdk.mongodb.net/test?retryWrites=true&w=majority`
   )
   .then(() => console.log('Connected mongoDB'))
   .catch(err => console.error('not connected mongoDB', err));
