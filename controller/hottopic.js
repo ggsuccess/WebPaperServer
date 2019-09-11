@@ -201,6 +201,10 @@ async function getHotTopic() {
   }
 }
 
+hottopicRouter.get('/get', () => {
+  getHotTopic();
+});
+
 hottopicRouter.get('/', async (req, res) => {
   try {
     let hottopic = await HotTopic.find().sort('-count');

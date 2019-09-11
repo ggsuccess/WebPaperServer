@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const winston = require('winston');
 const app = express();
+require('./middleware/protect')(app);
 const cors = require('cors');
 const { usersRouter } = require('./controller/user');
 const { getHotTopic, hottopicRouter } = require('./controller/hottopic');
@@ -42,10 +43,10 @@ let categoryStringArr = [
   'scienceAndTechnology'
 ];
 
-// if (!config.get('jwtPrivateKey')) {
-//   console.error('Error: jwtPrivateKey is not defined');
-//   process.exit(1);
-// }
+if (!config.get('jwtPrivateKey')) {
+  console.error('Error: jwtPrivateKey is not defined');
+  process.exit(1);
+}
 
 process.on('uncaughtException', err => {
   console.log('I got a uncaught exception error =>', Error);
@@ -59,7 +60,9 @@ process.on('unhandledRejection', err => {
 });
 
 mongoose
-  .connect('mongodb://localhost/webpaperdb')
+  .connect(
+    'mongodb+srv://admin:Fvifnwp6GQRVlOap@webpaperserver-dpwdk.mongodb.net/test?retryWrites=true&w=majority'
+  )
   .then(() => console.log('Connected mongoDB'))
   .catch(err => console.error('not connected mongoDB', err));
 
@@ -89,11 +92,7 @@ setInterval(() => {
       20
     );
   }
-}, 80 * min);
-
-setInterval(() => {
-  getHotTopic();
-}, 55 * min);
+}, 1000 * min);
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => console.log(`server on port ${port}...`));
