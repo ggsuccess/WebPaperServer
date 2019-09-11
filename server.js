@@ -9,7 +9,6 @@ require('./middleware/protect')(app);
 const cors = require('cors');
 const { usersRouter } = require('./controller/user');
 const { getHotTopic, hottopicRouter } = require('./controller/hottopic');
-const { API_KEY_COOKIE } = require('./key');
 const { authRouter } = require('./controller/auth');
 const { commentRouter, hotcommentRouter } = require('./controller/comment');
 const {
@@ -62,7 +61,7 @@ process.on('unhandledRejection', err => {
 mongoose
   .connect(
     // 'mongodb://localhost/webpaperdb'
-    'mongodb+srv://admin:Fvifnwp6GQRVlOap@webpaperserver-dpwdk.mongodb.net/test?retryWrites=true&w=majority'
+    `mongodb+srv://admin:${process.env.mgdbpw}@webpaperserver-dpwdk.mongodb.net/test?retryWrites=true&w=majority`
   )
   .then(() => console.log('Connected mongoDB'))
   .catch(err => console.error('not connected mongoDB', err));
@@ -86,7 +85,7 @@ setInterval(() => {
   for (let i = 0; i < categoryArr.length; i++) {
     saveAllArticle(
       '',
-      API_KEY_COOKIE,
+      process.env.API_KEY_COOKIE,
       categoryArr[i],
       'en-us',
       categoryStringArr[i],

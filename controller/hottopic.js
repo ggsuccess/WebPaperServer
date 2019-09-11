@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const express = require('express');
 const request = require('request');
 const hottopicRouter = express.Router();
-const { API_KEY_COOKIE } = require('../key');
 const BING_ENDPOINT = 'https://api.cognitive.microsoft.com/bing/v7.0/news';
 const {
   getCategory,
@@ -148,7 +147,7 @@ async function getHotTopic() {
       saveLinkedArticle(
         //각 기사제목 앞 세단어 검색
         result[i].name,
-        API_KEY_COOKIE,
+        process.env.API_KEY_COOKIE,
         'en-us',
         result[i].category,
         10
