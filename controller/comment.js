@@ -16,15 +16,15 @@ const Comment = mongoose.model(
 );
 
 commentRouter.post('/', auth, async (req, res) => {
-  console.log(req);
-  const { userId, hotTopicId, text, date } = req.body;
+  const { hotTopicId, text, date } = req.body;
+  console.log(hotTopicId, text, date);
   let comment = new Comment({
-    userId: userId,
+    userId: req.user.email,
     hotTopicId: hotTopicId,
     text: text,
     date: date
   });
-  let user = await User.find({ email: userId });
+  let user = await User.find({ email: req.user.email });
   user[0].comment.push(comment);
 
   await user[0].save();

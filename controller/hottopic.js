@@ -157,8 +157,9 @@ async function getHotTopic() {
   }
 }
 
-hottopicRouter.get('/get', () => {
+hottopicRouter.get('/get', (req, res) => {
   getHotTopic();
+  res.send('ok');
 });
 
 hottopicRouter.get('/', async (req, res) => {

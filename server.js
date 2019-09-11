@@ -61,6 +61,7 @@ process.on('unhandledRejection', err => {
 
 mongoose
   .connect(
+    // 'mongodb://localhost/webpaperdb'
     'mongodb+srv://admin:Fvifnwp6GQRVlOap@webpaperserver-dpwdk.mongodb.net/test?retryWrites=true&w=majority'
   )
   .then(() => console.log('Connected mongoDB'))
@@ -89,10 +90,10 @@ setInterval(() => {
       categoryArr[i],
       'en-us',
       categoryStringArr[i],
-      20
+      100
     );
   }
-}, 1000 * min);
+}, 3 * hour);
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => console.log(`server on port ${port}...`));
