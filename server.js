@@ -9,7 +9,6 @@ require('./middleware/protect')(app);
 const cors = require('cors');
 const { usersRouter } = require('./controller/user');
 const { getHotTopic, hottopicRouter } = require('./controller/hottopic');
-const { API_KEY_COOKIE } = require('./key');
 const { authRouter } = require('./controller/auth');
 const { commentRouter, hotcommentRouter } = require('./controller/comment');
 const {
@@ -86,7 +85,7 @@ setInterval(() => {
   for (let i = 0; i < categoryArr.length; i++) {
     saveAllArticle(
       '',
-      API_KEY_COOKIE,
+      process.env.API_KEY_COOKIE,
       categoryArr[i],
       'en-us',
       categoryStringArr[i],
