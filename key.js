@@ -1,0 +1,3 @@
+const API_KEY_COOKIE = '692833d2862843b4985f234b5b3011ec';
+
+module.exports = {API_KEY_COOKIE};

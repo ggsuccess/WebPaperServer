@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const express = require('express');
 const request = require('request');
 const hottopicRouter = express.Router();
-const { API_KEY_COOKIE } = require('../key');
 const BING_ENDPOINT = 'https://api.cognitive.microsoft.com/bing/v7.0/news';
 const {
   getCategory,
@@ -102,39 +101,6 @@ function saveLinkedArticle(query, key, lang, category, count) {
       let hot = await HotTopic.find({ topic: topic });
       hot[0].articleList = news;
       await hot[0].save();
-      // try {
-      //   for (let i = 0; i < info.value.length; i++) {
-      //     let news = info.value[i];
-      //     // console.log('뉴스객체', news);
-      //     if (news.category) {
-      //       let Model = getCategory(news.category);
-      //       if (Model) {
-      //         let model = await Model.find({ url: news.url });
-      //         if (model.length !== 0) {
-      //           model[0].keyword = query;
-      //           await model[0].save();
-      //         }
-      //       }
-      //       let model = new LinkedNews({
-      //         category: news.category,
-      //         url: news.url,
-      //         name: news.name,
-      //         img: news.image.thumbnail.contentUrl,
-      //         count: 0,
-      //         date: news.datePublished,
-      //         keyword: query
-      //       });
-
-      //       await LinkedNews.find({ url: model.url }, (err, docs) => {
-      //         if (!err && docs.length === 0) {
-      //           model.save();
-      //         }
-      //       });
-      //     }
-      //   }
-      // } catch (err) {
-      //   console.log(err);
-      // }
     }
   });
 }
@@ -181,25 +147,19 @@ async function getHotTopic() {
       saveLinkedArticle(
         //각 기사제목 앞 세단어 검색
         result[i].name,
-        API_KEY_COOKIE,
+        process.env.API_KEY_COOKIE,
         'en-us',
         result[i].category,
         10
       );
-      // let keyword = getKeyword(result[i].name);
-      // let Model = getCategory(hottopic.category);
-      // if (Model) {
-      //   try {
-      //     let model = await Model.find({ keyword: keyword });
-      //     hottopic.articleList = model;
-      //     await hottopic.save();
-      //   } catch (err) {
-      //     console.log(err);
-      //   }
-      // }
     }
   }
 }
+
+hottopicRouter.get('/get', (req, res) => {
+  getHotTopic();
+  res.send('ok');
+});
 
 hottopicRouter.get('/', async (req, res) => {
   try {
@@ -209,9 +169,5 @@ hottopicRouter.get('/', async (req, res) => {
     console.log(err);
   }
 });
-
-//최대 다섯개 의 핫토픽
-//존재하는 내용 모두 제거
-//각 카테고리별 탑 7개 선별 후 배치
 
 module.exports = { getHotTopic, hottopicRouter };
